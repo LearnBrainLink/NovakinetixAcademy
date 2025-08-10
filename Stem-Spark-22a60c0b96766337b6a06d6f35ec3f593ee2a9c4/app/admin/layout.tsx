@@ -107,7 +107,7 @@ export default function AdminLayout({
   return (
     <div className="admin-layout bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Sidebar - hover to expand on desktop; toggle on mobile */}
-      <div className={`admin-sidebar-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      <aside className={`admin-sidebar-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white overflow-hidden">
@@ -177,7 +177,7 @@ export default function AdminLayout({
             </form>
           </div>
         </div>
-      </div>
+      </aside>
       
       {/* Mobile Overlay */}
       {isSidebarOpen && (
@@ -188,7 +188,7 @@ export default function AdminLayout({
       )}
       
       {/* Main Content Area - Full Width with responsive container */}
-      <div className="admin-content-area container-responsive">
+      <main className="admin-content-area container-responsive">
         {/* Mobile Menu Button */}
         <button 
           className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-full shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200"
@@ -198,10 +198,10 @@ export default function AdminLayout({
         </button>
         
         {/* Content - Full Width and Height */}
-        <main className="admin-main-content-full pt-16 lg:pt-6 section-padding">
+        <div className="admin-main-content-full pt-16 lg:pt-6 section-padding">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
