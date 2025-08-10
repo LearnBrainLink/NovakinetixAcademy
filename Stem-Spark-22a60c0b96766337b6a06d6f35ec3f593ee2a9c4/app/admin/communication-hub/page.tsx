@@ -709,9 +709,8 @@ export default function AdminCommunicationHub() {
         for (const channel of allChannels) {
           let shouldShow = false
           
-          // Admin communication hub - admins can see management-relevant channels
+          // Admins can see all channels except Parent-Teacher and Student Lounge which are private spaces
           if (currentUser.role === 'admin') {
-            // Admins can see all channels except Parent-Teacher and Student Lounge which are private spaces
             shouldShow = (
               channel?.type !== 'parent_teacher' &&
               channel?.name !== 'Parent-Teacher' &&
@@ -719,7 +718,7 @@ export default function AdminCommunicationHub() {
               channel?.name !== 'Student Lounge'
             )
           } else {
-            // For non-admin users who somehow access admin hub, apply normal filtering
+            // Check if user should see this channel based on role and type
             switch (channel?.type) {
               case 'general':
                 shouldShow = true // Everyone can see General channels
@@ -727,9 +726,9 @@ export default function AdminCommunicationHub() {
               case 'announcements':
                 shouldShow = true // Everyone can see Announcements
                 break
-              case 'student_lounge':
-                // Only students should see Student Lounge; interns excluded
-                shouldShow = currentUser.role === 'student'
+            case 'student_lounge':
+              // Only students should see Student Lounge; interns excluded
+              shouldShow = currentUser.role === 'student'
                 break
               case 'admin_only':
                 shouldShow = currentUser.role === 'admin'
@@ -747,8 +746,9 @@ export default function AdminCommunicationHub() {
                 // Handle legacy channels by name
                 if (channel?.name === 'General' || channel?.name === 'Announcements') {
                   shouldShow = true
-                } else if (channel?.name === 'Student Lounge') {
-                  shouldShow = currentUser.role === 'student' || currentUser.role === 'intern'
+              } else if (channel?.name === 'Student Lounge') {
+                // Only students should see Student Lounge; interns excluded
+                shouldShow = currentUser.role === 'student'
                 } else if (channel?.name === 'Admin Hub') {
                   shouldShow = currentUser.role === 'admin'
                 } else if (channel?.name === 'Parent-Teacher') {
@@ -1203,16 +1203,19 @@ export default function AdminCommunicationHub() {
       console.log('Fetched members:', combinedMembers)
       setChannelMembers(combinedMembers)
 
-      // Also fetch bans for this channel
-      const { data: bans } = await supabase
-        .from('channel_bans')
-        .select('user_id')
-        .eq('channel_id', selectedChannel.id)
-      const bannedSet = new Set((bans || []).map(b => b.user_id))
-      setChannelMembers(prev => prev.map(m => ({
-        ...m,
-        user: m.user ? { ...m.user, role: bannedSet.has(m.user_id) ? `${m.user.role} (banned)` : m.user.role } : m.user
-      })))
+      // Also fetch bans for this channel (only managers fetch)
+      if (canManageChannel(selectedChannel)) {
+        const { data: bans } = await supabase
+          .from('channel_bans')
+          .select('user_id')
+          .eq('channel_id', selectedChannel.id)
+        const bannedSet = new Set((bans || []).map(b => b.user_id))
+        // Mark banned users in local state for UI badges
+        setChannelMembers(prev => prev.map(m => ({
+          ...m,
+          user: m.user ? { ...m.user, role: bannedSet.has(m.user_id) ? `${m.user.role} (banned)` : m.user.role } : m.user
+        })))
+      }
     } catch (error) {
       console.error('Error fetching channel members:', error)
       toast({
@@ -1634,30 +1637,51 @@ export default function AdminCommunicationHub() {
           <div className="wa-mobile-chat">
             {/* Messages Area */}
             <div className="wa-mobile-messages whatsapp-chat-bg">
-              {messages.map((message) => {
-                const isOwn = message.sender_id === user?.id
-                const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
-                
-                return (
-                  <div key={message.id} className="wa-mobile-message-container">
-                    {!isOwn && (
-                      <div className="wa-mobile-sender-name">
-                        {message.sender?.full_name || 'Unknown User'}
-                        {isAdmin && <span className="ml-2 text-purple-600">(Admin)</span>}
-                      </div>
-                    )}
-                    <div className={`bubble-${isOwn ? 'own' : 'other'}`}>
-                      <div className="break-words">
-                        {message.content}
-                      </div>
-                      <div className="wa-mobile-message-time">
-                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              <div className="chat-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}>
+                {messages.map((message) => {
+                  const isOwn = message.sender_id === user?.id
+                  const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
+                  
+                  return (
+                    <div key={message.id} className="message-wrapper" style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px', width: '100%' }}>
+                      {!isOwn && (
+                        <div className="wa-mobile-sender-name">
+                          {message.sender?.full_name || 'Unknown User'}
+                          {isAdmin && <span className="ml-2 text-purple-600">(Admin)</span>}
+                        </div>
+                      )}
+                      <div 
+                        className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}
+                        style={{
+                          padding: '10px 15px',
+                          borderRadius: '18px',
+                          maxWidth: '70%',
+                          wordWrap: 'break-word',
+                          position: 'relative',
+                          marginBottom: '4px',
+                          display: 'block',
+                          boxSizing: 'border-box',
+                          backgroundColor: isOwn ? '#DCF8C6' : '#E5E5EA',
+                          color: '#000',
+                          alignSelf: isOwn ? 'flex-end' : 'flex-start',
+                          marginLeft: isOwn ? 'auto' : '0',
+                          marginRight: isOwn ? '0' : 'auto',
+                          borderBottomRightRadius: isOwn ? '4px' : '18px',
+                          borderBottomLeftRadius: isOwn ? '18px' : '4px'
+                        }}
+                      >
+                        <div className="break-words">
+                          {message.content}
+                        </div>
+                        <div className="bubble-meta">
+                          {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-              <div ref={messagesEndRef} />
+                  )
+                })}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Mobile Input Area */}
@@ -1742,12 +1766,12 @@ export default function AdminCommunicationHub() {
       <div className="hidden sm:block">
         {/* Desktop Header */}
         <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                      <div className="flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Admin Communication Hub</h1>
                 <div className="flex items-center space-x-4 mt-1">
-                  <p className="text-gray-600">Manage messaging channels and communications</p>
+                  <p className="text-gray-600">Connect with your learning community</p>
                   {ConnectionStatusIndicator}
                 </div>
               </div>
@@ -1758,123 +1782,123 @@ export default function AdminCommunicationHub() {
                     Individual Conversations
                   </Button>
                 </Link>
+                <Link href={getDashboardUrl()}>
+                  <Button variant="outline">
+                    <ChevronRight className="w-4 h-4 mr-2" />
+                    Back to Dashboard
+                  </Button>
+                </Link>
               </div>
-            <Link href={getDashboardUrl()}>
-              <Button variant="outline">
-                <ChevronRight className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Channels Sidebar */}
-          <div className="hidden lg:block lg:col-span-1 channel-sidebar">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center">
-                    <Hash className="w-5 h-5 mr-2" />
-                    Channels
-                  </span>
-                  <div className="flex items-center space-x-2">
-                  <Badge variant="secondary">{channels.length}</Badge>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowCreateDialog(true)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Channels Sidebar */}
+            <div className="hidden lg:block lg:col-span-1 channel-sidebar">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center">
+                      <Hash className="w-5 h-5 mr-2" />
+                      Channels
+                    </span>
+                    <div className="flex items-center space-x-2">
+                    <Badge variant="secondary">{channels.length}</Badge>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowCreateDialog(true)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="channel-search">
+                    <Input
+                      value={channelSearch}
+                      onChange={(e) => setChannelSearch(e.target.value)}
+                      placeholder="Search channels"
+                      className="h-9"
+                    />
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="channel-search">
-                  <Input
-                    value={channelSearch}
-                    onChange={(e) => setChannelSearch(e.target.value)}
-                    placeholder="Search channels"
-                    className="h-9"
-                  />
-                </div>
-                <div className="channel-list">
-                  {channels
-                    .filter((c) => c.name.toLowerCase().includes(channelSearch.toLowerCase()))
-                    .map((channel) => (
-                    <div
-                      key={channel.id}
-                      className={`channel-item ${
-                        selectedChannel?.id === channel.id ? 'selected' : ''
-                      }`}
-                      onClick={() => setSelectedChannel(channel)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                          <div className={`channel-icon ${channel.type}`}>
-                            {channel.type === 'announcements' ? (
-                              <Megaphone className="w-4 h-4 text-green-600" />
-                            ) : channel.type === 'private' ? (
-                              <Lock className="w-4 h-4 text-gray-500" />
-                            ) : channel.type === 'student_lounge' ? (
-                              <Users className="w-4 h-4 text-purple-600" />
-                            ) : channel.type === 'parent_teacher' ? (
-                              <Users className="w-4 h-4 text-orange-600" />
-                            ) : channel.type === 'admin_only' ? (
-                              <Shield className="w-4 h-4 text-red-600" />
-                            ) : channel.type === 'group' ? (
-                              <Users className="w-4 h-4 text-indigo-600" />
-                            ) : channel.type === 'individual' ? (
-                              <UserIcon className="w-4 h-4 text-pink-600" />
-                            ) : (
-                              <Hash className="w-4 h-4 text-blue-600" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="channel-name">#{channel?.name || 'Unknown Channel'}</h4>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge variant="outline" className="channel-type-badge">
-                                {channel?.type || 'general'}
-                              </Badge>
-                              <div className="channel-member-count">
-                                <Users className="w-3 h-3 mr-1" />
-                                {channel?.member_count || 0}
+                  <div className="channel-list">
+                    {channels
+                      .filter((c) => c.name.toLowerCase().includes(channelSearch.toLowerCase()))
+                      .map((channel) => (
+                      <div
+                        key={channel.id}
+                        className={`channel-item ${
+                          selectedChannel?.id === channel.id ? 'selected' : ''
+                        }`}
+                        onClick={() => setSelectedChannel(channel)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <div className={`channel-icon ${channel.type}`}>
+                              {channel.type === 'announcements' ? (
+                                <Megaphone className="w-4 h-4 text-green-600" />
+                              ) : channel.type === 'private' ? (
+                                <Lock className="w-4 h-4 text-gray-500" />
+                              ) : channel.type === 'student_lounge' ? (
+                                <Users className="w-4 h-4 text-purple-600" />
+                              ) : channel.type === 'parent_teacher' ? (
+                                <Users className="w-4 h-4 text-orange-600" />
+                              ) : channel.type === 'admin_only' ? (
+                                <Shield className="w-4 h-4 text-red-600" />
+                              ) : channel.type === 'group' ? (
+                                <Users className="w-4 h-4 text-indigo-600" />
+                              ) : channel.type === 'individual' ? (
+                                <UserIcon className="w-4 h-4 text-pink-600" />
+                              ) : (
+                                <Hash className="w-4 h-4 text-blue-600" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="channel-name">#{channel?.name || 'Unknown Channel'}</h4>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Badge variant="outline" className="channel-type-badge">
+                                  {channel?.type || 'general'}
+                                </Badge>
+                                <div className="channel-member-count">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  {channel?.member_count || 0}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            {selectedChannel ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Messages Area */}
-                <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center space-x-2">
-                                            <Button
-                    variant="ghost"
-                    className="h-auto p-0 text-lg font-semibold hover:bg-transparent"
-                    onClick={async () => {
-                      await fetchChannelMembers()
-                      await fetchAvailableUsers()
-                      setShowMembersDialog(true)
-                    }}
-                  >
-                  {selectedChannel ? `#${selectedChannel.name}` : 'Messages'}
-                          </Button>
+            {/* Main Content Area */}
+            <div className="lg:col-span-3">
+              {selectedChannel ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Messages Area */}
+                  <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center space-x-2">
+                                              <Button
+                      variant="ghost"
+                      className="h-auto p-0 text-lg font-semibold hover:bg-transparent"
+                      onClick={async () => {
+                        await fetchChannelMembers()
+                        await fetchAvailableUsers()
+                        setShowMembersDialog(true)
+                      }}
+                    >
+                    {selectedChannel ? `#${selectedChannel.name}` : 'Messages'}
+                            </Button>
                           <Badge variant="outline">{selectedChannel?.type || 'general'}</Badge>
                 </CardTitle>
                         <div className="flex items-center space-x-2">
@@ -1886,108 +1910,126 @@ export default function AdminCommunicationHub() {
                   <div className="flex flex-col min-h-[60vh] sm:h-[calc(100vh-20rem)]">
                     {/* Messages */}
                         <ScrollArea className="flex-1 p-4 touch-scroll safe-bottom whatsapp-chat-bg">
-                          <div className="chat-container">
-                      {messages.map((message) => {
-                        const isOwn = message.sender_id === user?.id
-                        const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
-                        
-                        return (
-                          <div key={message.id} className="message-wrapper">
-                            {/* Message bubble */}
-                            <div className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}>
-                                {/* Text content */}
-                                {message.content && (
-                                  <div className="text-sm">{message.content}</div>
-                                )}
-                                
-                                {/* Image content */}
-                                {message.message_type === 'image' && message.file_url && (
-                                  <div className="mt-2">
-                                    <img 
-                                      src={message.file_url} 
-                                      alt={message.file_name || 'Image'}
-                                      className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
-                                      onClick={() => window.open(message.file_url, '_blank')}
-                                    />
-                                    {message.image_caption && (
-                                      <p className="text-xs text-gray-600 mt-1 italic">
-                                        {message.image_caption}
-                                      </p>
+                                                <div className="chat-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}>
+                        {messages.map((message) => {
+                          const isOwn = message.sender_id === user?.id
+                          const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
+                          
+                          return (
+                            <div key={message.id} className="message-wrapper group" style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px', width: '100%' }}>
+                              {/* Message bubble */}
+                              <div 
+                                className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}
+                                style={{
+                                  padding: '10px 15px',
+                                  borderRadius: '18px',
+                                  maxWidth: '70%',
+                                  wordWrap: 'break-word',
+                                  position: 'relative',
+                                  marginBottom: '4px',
+                                  display: 'block',
+                                  boxSizing: 'border-box',
+                                  backgroundColor: isOwn ? '#DCF8C6' : '#E5E5EA',
+                                  color: '#000',
+                                  alignSelf: isOwn ? 'flex-end' : 'flex-start',
+                                  marginLeft: isOwn ? 'auto' : '0',
+                                  marginRight: isOwn ? '0' : 'auto',
+                                  borderBottomRightRadius: isOwn ? '4px' : '18px',
+                                  borderBottomLeftRadius: isOwn ? '18px' : '4px'
+                                }}
+                              >
+                                    {/* Text content */}
+                                    {message.content && (
+                                      <div className="text-sm">{message.content}</div>
                                     )}
-                                  </div>
-                                )}
-                                
-                                {/* File content */}
-                                {message.message_type === 'file' && message.file_url && (
-                                  <div className="mt-2">
-                                    <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded border">
-                                      <Paperclip className="w-4 h-4" />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium">{message.file_name}</p>
-                                        <p className="text-xs text-gray-500">
-                                          {message.file_size ? `${(message.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
-                                        </p>
+                                    
+                                    {/* Image content */}
+                                    {message.message_type === 'image' && message.file_url && (
+                                      <div className="mt-2">
+                                        <img 
+                                          src={message.file_url} 
+                                          alt={message.file_name || 'Image'}
+                                          className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => window.open(message.file_url, '_blank')}
+                                        />
+                                        {message.image_caption && (
+                                          <p className="text-xs text-gray-600 mt-1 italic">
+                                            {message.image_caption}
+                                          </p>
+                                        )}
                                       </div>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => window.open(message.file_url, '_blank')}
-                                      >
-                                        Download
-                                      </Button>
-                                    </div>
-                                    {message.image_caption && (
-                                      <p className="text-xs text-gray-600 italic mt-1">
-                                        {message.image_caption}
-                                      </p>
                                     )}
+                                    
+                                    {/* File content */}
+                                    {message.message_type === 'file' && message.file_url && (
+                                      <div className="mt-2">
+                                        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded border">
+                                          <Paperclip className="w-4 h-4" />
+                                          <div className="flex-1">
+                                            <p className="text-sm font-medium">{message.file_name}</p>
+                                            <p className="text-xs text-gray-500">
+                                              {message.file_size ? `${(message.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+                                            </p>
+                                          </div>
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline"
+                                            onClick={() => window.open(message.file_url, '_blank')}
+                                          >
+                                            Download
+                                          </Button>
+                                        </div>
+                                        {message.image_caption && (
+                                          <p className="text-xs text-gray-600 italic mt-1">
+                                            {message.image_caption}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Meta time inside bubble */}
+                                    <div className="bubble-meta">
+                                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
                                   </div>
-                                )}
 
-                                {/* Meta time inside bubble */}
-                                <div className="bubble-meta">
-                                  {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  {/* Message actions */}
+                                  <div className="flex items-center space-x-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {!isOwn && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleReply(message)}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Reply className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setForwardingMessage(message)
+                                        setShowForwardDialog(true)
+                                      }}
+                                      className="h-6 w-6 p-0"
+                                    >
+                                      <Forward className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-
-                              {/* Message actions */}
-                              <div className="flex items-center space-x-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {!isOwn && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleReply(message)}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Reply className="w-3 h-3" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setForwardingMessage(message)
-                                    setShowForwardDialog(true)
-                                  }}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <Forward className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteMessage(message.id)}
-                                  className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
+                              )
+                            })}
+                            <div ref={messagesEndRef} />
                           </div>
-                        )
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
                         </ScrollArea>
 
                     {/* Reply banner */}
@@ -2227,42 +2269,7 @@ export default function AdminCommunicationHub() {
         </div>
 
         {/* Dialogs */}
-        {/* Mobile channels dialog */}
-        <Dialog open={isMobileChannelsOpen} onOpenChange={setIsMobileChannelsOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Channels</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-2">
-              {channels.map((channel) => (
-                <div
-                  key={channel.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedChannel?.id === channel.id ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    setSelectedChannel(channel)
-                    setIsMobileChannelsOpen(false)
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">#{channel?.name || 'Unknown Channel'}</h4>
-                      <p className="text-sm text-gray-600 truncate">{channel?.description || 'No description'}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant="outline" className="text-xs">{channel?.type || 'general'}</Badge>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Users className="w-3 h-3 mr-1" />
-                          {channel?.member_count || 0}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
+
         {/* Forward Message Dialog */}
         <Dialog open={showForwardDialog} onOpenChange={setShowForwardDialog}>
           <DialogContent>

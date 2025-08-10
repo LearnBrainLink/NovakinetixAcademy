@@ -669,58 +669,102 @@
 
 /* WhatsApp-style Chat Bubble Styling */
 .chat-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  max-width: 100%;
-  margin: 0 auto;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 10px !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
 }
 
 .message-wrapper {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 8px;
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: 8px !important;
+  width: 100% !important;
 }
 
 .message-bubble {
-  padding: 10px 15px;
-  border-radius: 18px;
-  max-width: 70%;
-  word-wrap: break-word;
-  position: relative;
-  margin-bottom: 4px;
+  padding: 10px 15px !important;
+  border-radius: 18px !important;
+  max-width: 70% !important;
+  word-wrap: break-word !important;
+  position: relative !important;
+  margin-bottom: 4px !important;
+  display: block !important;
+  box-sizing: border-box !important;
 }
 
 .my-bubble {
-  background-color: #DCF8C6; /* WhatsApp green */
-  align-self: flex-end;
-  border-bottom-right-radius: 4px;
-  margin-left: auto;
-  color: #000;
+  background-color: #DCF8C6 !important; /* WhatsApp green */
+  align-self: flex-end !important;
+  border-bottom-right-radius: 4px !important;
+  margin-left: auto !important;
+  color: #000 !important;
+  float: right !important;
+  clear: both !important;
 }
 
 .other-bubble {
-  background-color: #E5E5EA; /* Light grey */
-  align-self: flex-start;
-  border-bottom-left-radius: 4px;
-  margin-right: auto;
-  color: #000;
+  background-color: #E5E5EA !important; /* Light grey */
+  align-self: flex-start !important;
+  border-bottom-left-radius: 4px !important;
+  margin-right: auto !important;
+  color: #000 !important;
+  float: left !important;
+  clear: both !important;
 }
 
 .bubble-meta {
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 4px;
-  text-align: right;
+  font-size: 0.75rem !important;
+  color: #666 !important;
+  margin-top: 4px !important;
+  text-align: right !important;
+  display: block !important;
 }
 
 .my-bubble .bubble-meta {
-  text-align: right;
+  text-align: right !important;
 }
 
 .other-bubble .bubble-meta {
-  text-align: left;
+  text-align: left !important;
+}
+
+/* Force bubble visibility and override any conflicting styles */
+.chat-container .message-wrapper .message-bubble {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Ensure proper spacing and layout */
+.chat-container .message-wrapper {
+  position: relative !important;
+  clear: both !important;
+  overflow: hidden !important;
+}
+
+/* Mobile specific bubble adjustments */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 85% !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .chat-container {
+    padding: 8px !important;
+  }
+}
+
+/* Desktop specific bubble adjustments */
+@media (min-width: 769px) {
+  .message-bubble {
+    max-width: 60% !important;
+  }
 }
 
 /* WhatsApp-style background */

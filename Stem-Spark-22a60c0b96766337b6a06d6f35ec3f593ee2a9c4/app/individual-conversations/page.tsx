@@ -487,13 +487,13 @@ export default function IndividualConversations() {
                   <div className="flex flex-col min-h-[60vh] sm:h-[calc(100vh-20rem)]">
                     {/* Messages */}
                     <ScrollArea className="flex-1 p-4 touch-scroll safe-bottom whatsapp-chat-bg">
-                      <div className="chat-container">
+                      <div className="chat-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}>
                         {messages.map((message) => {
                           const isOwn = message.sender_id === user?.id
                           const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
                           
                           return (
-                            <div key={message.id} className="message-wrapper">
+                            <div key={message.id} className="message-wrapper" style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px', width: '100%' }}>
                               {!isOwn && (
                                 <div className="flex items-center space-x-2 mb-1">
                                   <Avatar className="w-6 h-6">
@@ -508,7 +508,26 @@ export default function IndividualConversations() {
                                   </span>
                                 </div>
                               )}
-                              <div className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}>
+                              <div 
+                                className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}
+                                style={{
+                                  padding: '10px 15px',
+                                  borderRadius: '18px',
+                                  maxWidth: '70%',
+                                  wordWrap: 'break-word',
+                                  position: 'relative',
+                                  marginBottom: '4px',
+                                  display: 'block',
+                                  boxSizing: 'border-box',
+                                  backgroundColor: isOwn ? '#DCF8C6' : '#E5E5EA',
+                                  color: '#000',
+                                  alignSelf: isOwn ? 'flex-end' : 'flex-start',
+                                  marginLeft: isOwn ? 'auto' : '0',
+                                  marginRight: isOwn ? '0' : 'auto',
+                                  borderBottomRightRadius: isOwn ? '4px' : '18px',
+                                  borderBottomLeftRadius: isOwn ? '18px' : '4px'
+                                }}
+                              >
                                 <div className="text-sm">{message.content}</div>
                                 <div className="bubble-meta">
                                   {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
