@@ -1637,30 +1637,32 @@ export default function CommunicationHub() {
           <div className="wa-mobile-chat">
             {/* Messages Area */}
             <div className="wa-mobile-messages whatsapp-chat-bg">
-              {messages.map((message) => {
-                const isOwn = message.sender_id === user?.id
-                const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
-                
-                return (
-                  <div key={message.id} className="wa-mobile-message-container">
-                    {!isOwn && (
-                      <div className="wa-mobile-sender-name">
-                        {message.sender?.full_name || 'Unknown User'}
-                        {isAdmin && <span className="ml-2 text-purple-600">(Admin)</span>}
-                      </div>
-                    )}
-                    <div className={`bubble-${isOwn ? 'own' : 'other'}`}>
-                      <div className="break-words">
-                        {message.content}
-                      </div>
-                      <div className="wa-mobile-message-time">
-                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              <div className="chat-container">
+                {messages.map((message) => {
+                  const isOwn = message.sender_id === user?.id
+                  const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
+                  
+                  return (
+                    <div key={message.id} className="message-wrapper">
+                      {!isOwn && (
+                        <div className="wa-mobile-sender-name">
+                          {message.sender?.full_name || 'Unknown User'}
+                          {isAdmin && <span className="ml-2 text-purple-600">(Admin)</span>}
+                        </div>
+                      )}
+                      <div className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}>
+                        <div className="break-words">
+                          {message.content}
+                        </div>
+                        <div className="bubble-meta">
+                          {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-              <div ref={messagesEndRef} />
+                  )
+                })}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Mobile Input Area */}
@@ -1889,136 +1891,107 @@ export default function CommunicationHub() {
                   <div className="flex flex-col min-h-[60vh] sm:h-[calc(100vh-20rem)]">
                     {/* Messages */}
                         <ScrollArea className="flex-1 p-4 touch-scroll safe-bottom whatsapp-chat-bg">
-                          <div className="space-y-4">
-                      {messages.map((message) => {
-                        const isOwn = message.sender_id === user?.id
-                        const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
-                        
-                        return (
-                          <div key={message.id} className={`flex space-x-3 ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarFallback className={isOwn ? 'bg-green-500 text-white' : isAdmin ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'}>
-                                {isAdmin ? <Crown className="w-4 h-4" /> : (message.sender_name?.charAt(0) || 'U').toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                            <div className={`flex-1 ${isOwn ? 'text-right' : ''}`}>
-                              <div className={`flex items-center space-x-2 ${isOwn ? 'justify-end' : ''}`}>
-                                <span className="text-sm font-medium text-gray-900">
-                                  {message.sender_name || 'Unknown User'}
-                                  {isAdmin && <Crown className="w-3 h-3 ml-1 text-purple-500" />}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {new Date(message.created_at).toLocaleString()}
-                                </span>
-                              </div>
+                          <div className="chat-container">
+                            {messages.map((message) => {
+                              const isOwn = message.sender_id === user?.id
+                              const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
                               
-                              {/* Reply context */}
-                              {message.reply_to && (
-                                <div className="mt-1 p-2 bg-gray-100 rounded border-l-2 border-gray-300">
-                                  <p className="text-xs text-gray-600">
-                                    Replying to {message.reply_to.profiles.full_name}
-                                  </p>
-                                  <p className="text-sm text-gray-800 truncate">
-                                    {message.reply_to.content}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Message content */}
-                              <div className={`${isOwn ? 'bubble-own' : 'bubble-other'}`}>
-                                {/* Text content */}
-                                {message.content && (
-                                  <div className="text-sm">{message.content}</div>
-                                )}
-                                
-                                {/* Image content */}
-                                {message.message_type === 'image' && message.file_url && (
-                                  <div className="mt-2">
-                                    <img 
-                                      src={message.file_url} 
-                                      alt={message.file_name || 'Image'}
-                                      className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
-                                      onClick={() => window.open(message.file_url, '_blank')}
-                                    />
-                                    {message.image_caption && (
-                                      <p className="text-xs text-gray-600 mt-1 italic">
-                                        {message.image_caption}
-                                      </p>
+                              return (
+                                <div key={message.id} className="message-wrapper group">
+                                  {/* Message bubble */}
+                                  <div className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}>
+                                    {/* Text content */}
+                                    {message.content && (
+                                      <div className="text-sm">{message.content}</div>
                                     )}
-                                  </div>
-                                )}
-                                
-                                {/* File content */}
-                                {message.message_type === 'file' && message.file_url && (
-                                  <div className="mt-2">
-                                    <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded border">
-                                      <Paperclip className="w-4 h-4" />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium">{message.file_name}</p>
-                                        <p className="text-xs text-gray-500">
-                                          {message.file_size ? `${(message.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
-                                        </p>
+                                    
+                                    {/* Image content */}
+                                    {message.message_type === 'image' && message.file_url && (
+                                      <div className="mt-2">
+                                        <img 
+                                          src={message.file_url} 
+                                          alt={message.file_name || 'Image'}
+                                          className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => window.open(message.file_url, '_blank')}
+                                        />
+                                        {message.image_caption && (
+                                          <p className="text-xs text-gray-600 mt-1 italic">
+                                            {message.image_caption}
+                                          </p>
+                                        )}
                                       </div>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => window.open(message.file_url, '_blank')}
-                                      >
-                                        Download
-                                      </Button>
-                                    </div>
-                                    {message.image_caption && (
-                                      <p className="text-xs text-gray-600 italic mt-1">
-                                        {message.image_caption}
-                                      </p>
                                     )}
+                                    
+                                    {/* File content */}
+                                    {message.message_type === 'file' && message.file_url && (
+                                      <div className="mt-2">
+                                        <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded border">
+                                          <Paperclip className="w-4 h-4" />
+                                          <div className="flex-1">
+                                            <p className="text-sm font-medium">{message.file_name}</p>
+                                            <p className="text-xs text-gray-500">
+                                              {message.file_size ? `${(message.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+                                            </p>
+                                          </div>
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline"
+                                            onClick={() => window.open(message.file_url, '_blank')}
+                                          >
+                                            Download
+                                          </Button>
+                                        </div>
+                                        {message.image_caption && (
+                                          <p className="text-xs text-gray-600 italic mt-1">
+                                            {message.image_caption}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Meta time inside bubble */}
+                                    <div className="bubble-meta">
+                                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
                                   </div>
-                                )}
 
-                                {/* Meta time inside bubble */}
-                                <div className="bubble-meta">
-                                  {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  {/* Message actions */}
+                                  <div className="flex items-center space-x-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {!isOwn && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleReply(message)}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <Reply className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setForwardingMessage(message)
+                                        setShowForwardDialog(true)
+                                      }}
+                                      className="h-6 w-6 p-0"
+                                    >
+                                      <Forward className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-
-                              {/* Message actions */}
-                              <div className="flex items-center space-x-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {!isOwn && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleReply(message)}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <Reply className="w-3 h-3" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setForwardingMessage(message)
-                                    setShowForwardDialog(true)
-                                  }}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <Forward className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteMessage(message.id)}
-                                  className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
+                              )
+                            })}
+                            <div ref={messagesEndRef} />
                           </div>
-                        )
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
                         </ScrollArea>
 
                     {/* Reply banner */}

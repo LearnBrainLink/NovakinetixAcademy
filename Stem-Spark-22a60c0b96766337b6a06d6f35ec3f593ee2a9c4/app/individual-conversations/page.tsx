@@ -486,36 +486,32 @@ export default function IndividualConversations() {
                 <CardContent>
                   <div className="flex flex-col min-h-[60vh] sm:h-[calc(100vh-20rem)]">
                     {/* Messages */}
-                    <ScrollArea className="flex-1 p-4 touch-scroll safe-bottom">
-                      <div className="space-y-4">
+                    <ScrollArea className="flex-1 p-4 touch-scroll safe-bottom whatsapp-chat-bg">
+                      <div className="chat-container">
                         {messages.map((message) => {
                           const isOwn = message.sender_id === user?.id
                           const isAdmin = message.sender?.role === 'admin' || message.sender?.role === 'super_admin'
                           
                           return (
-                            <div key={message.id} className={`flex space-x-3 ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                              <Avatar className="w-8 h-8">
-                                <AvatarFallback className={isOwn ? 'bg-green-500 text-white' : isAdmin ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'}>
-                                  {isAdmin ? <Crown className="w-4 h-4" /> : (message.sender_name?.charAt(0) || 'U').toUpperCase()}
-                                </AvatarFallback>
-                                <AvatarImage src={message.sender?.avatar_url} />
-                              </Avatar>
-                              <div className={`flex-1 ${isOwn ? 'text-right' : ''}`}>
-                                <div className={`flex items-center space-x-2 ${isOwn ? 'justify-end' : ''}`}>
+                            <div key={message.id} className="message-wrapper">
+                              {!isOwn && (
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <Avatar className="w-6 h-6">
+                                    <AvatarFallback className={isAdmin ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'}>
+                                      {isAdmin ? <Crown className="w-3 h-3" /> : (message.sender_name?.charAt(0) || 'U').toUpperCase()}
+                                    </AvatarFallback>
+                                    <AvatarImage src={message.sender?.avatar_url} />
+                                  </Avatar>
                                   <span className="text-sm font-medium text-gray-900">
                                     {message.sender_name || 'Unknown User'}
                                     {isAdmin && <Crown className="w-3 h-3 ml-1 text-purple-500" />}
                                   </span>
-                                  <span className="text-xs text-gray-500">
-                                    {new Date(message.created_at).toLocaleString()}
-                                  </span>
                                 </div>
-                                <div className={`mt-1 p-3 rounded-lg ${
-                                  isOwn 
-                                    ? 'bg-blue-500 text-white' 
-                                    : 'bg-gray-100 text-gray-900'
-                                }`}>
-                                  <p className="text-sm">{message.content}</p>
+                              )}
+                              <div className={`message-bubble ${isOwn ? 'my-bubble' : 'other-bubble'}`}>
+                                <div className="text-sm">{message.content}</div>
+                                <div className="bubble-meta">
+                                  {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </div>
                             </div>
