@@ -153,6 +153,9 @@ export default function CommunicationHub() {
   const [availableUsers, setAvailableUsers] = useState<User[]>([])
   const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('')
   const [selectedUserToRemove, setSelectedUserToRemove] = useState<string>('')
+  const [selectedUserToBan, setSelectedUserToBan] = useState<string>('')
+  const [selectedUserToUnban, setSelectedUserToUnban] = useState<string>('')
+  const [bannedUserIds, setBannedUserIds] = useState<string[]>([])
   
   // Todo list state
   const [showTodoDialog, setShowTodoDialog] = useState(false)
@@ -1209,12 +1212,16 @@ export default function CommunicationHub() {
           .from('channel_bans')
           .select('user_id')
           .eq('channel_id', selectedChannel.id)
-        const bannedSet = new Set((bans || []).map(b => b.user_id))
+        const banned = (bans || []).map(b => b.user_id)
+        setBannedUserIds(banned)
+        const bannedSet = new Set(banned)
         // Mark banned users in local state for UI badges
         setChannelMembers(prev => prev.map(m => ({
           ...m,
           user: m.user ? { ...m.user, role: bannedSet.has(m.user_id) ? `${m.user.role} (banned)` : m.user.role } : m.user
         })))
+      } else {
+        setBannedUserIds([])
       }
     } catch (error) {
       console.error('Error fetching channel members:', error)
@@ -2412,49 +2419,8 @@ export default function CommunicationHub() {
                         <Badge variant="secondary" className="text-xs">
                           {member.user?.role}
                         </Badge>
-                        {canManageChannel(selectedChannel) && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={async () => {
-                                try {
-                                  const response = await fetch('/api/messaging/bans', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'ban', channel_id: selectedChannel?.id, target_user_id: member.user_id })
-                                  })
-                                  const result = await response.json()
-                                  if (!response.ok) throw new Error(result.error || 'Failed to ban')
-                                  await fetchChannelMembers()
-                                } catch (e) {
-                                  console.error(e)
-                                }
-                              }}
-                            >
-                              Ban
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={async () => {
-                                try {
-                                  const response = await fetch('/api/messaging/bans', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'unban', channel_id: selectedChannel?.id, target_user_id: member.user_id })
-                                  })
-                                  const result = await response.json()
-                                  if (!response.ok) throw new Error(result.error || 'Failed to unban')
-                                  await fetchChannelMembers()
-                                } catch (e) {
-                                  console.error(e)
-                                }
-                              }}
-                            >
-                              Unban
-                            </Button>
-                          </>
+                        {canManageChannel(selectedChannel) && bannedUserIds.includes(member.user_id) && (
+                          <Badge variant="destructive" className="text-xs">Banned</Badge>
                         )}
                       </div>
                     </div>
@@ -2516,6 +2482,98 @@ export default function CommunicationHub() {
                       size="sm"
                     >
                       Remove
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Ban User Section */}
+              {canManageChannel(selectedChannel) && (
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium mb-2">Ban Member</h3>
+                  <div className="flex space-x-2">
+                    <Select value={selectedUserToBan} onValueChange={setSelectedUserToBan}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select user to ban" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {channelMembers
+                          .filter(m => !bannedUserIds.includes(m.user_id))
+                          .map((member) => (
+                            <SelectItem key={member.id} value={member.user_id}>
+                              {member.user?.full_name} ({member.role})
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={async () => {
+                        if (!selectedChannel || !selectedUserToBan) return
+                        try {
+                          const response = await fetch('/api/messaging/bans', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'ban', channel_id: selectedChannel.id, target_user_id: selectedUserToBan })
+                          })
+                          const result = await response.json()
+                          if (!response.ok) throw new Error(result.error || 'Failed to ban')
+                          setSelectedUserToBan('')
+                          await fetchChannelMembers()
+                        } catch (e) {
+                          console.error(e)
+                        }
+                      }} 
+                      disabled={!selectedUserToBan}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      Ban
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Unban User Section */}
+              {canManageChannel(selectedChannel) && bannedUserIds.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium mb-2">Unban Member</h3>
+                  <div className="flex space-x-2">
+                    <Select value={selectedUserToUnban} onValueChange={setSelectedUserToUnban}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select user to unban" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {channelMembers
+                          .filter(m => bannedUserIds.includes(m.user_id))
+                          .map((member) => (
+                            <SelectItem key={member.id} value={member.user_id}>
+                              {member.user?.full_name} ({member.role})
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={async () => {
+                        if (!selectedChannel || !selectedUserToUnban) return
+                        try {
+                          const response = await fetch('/api/messaging/bans', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'unban', channel_id: selectedChannel.id, target_user_id: selectedUserToUnban })
+                          })
+                          const result = await response.json()
+                          if (!response.ok) throw new Error(result.error || 'Failed to unban')
+                          setSelectedUserToUnban('')
+                          await fetchChannelMembers()
+                        } catch (e) {
+                          console.error(e)
+                        }
+                      }} 
+                      disabled={!selectedUserToUnban}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Unban
                     </Button>
                   </div>
                 </div>
