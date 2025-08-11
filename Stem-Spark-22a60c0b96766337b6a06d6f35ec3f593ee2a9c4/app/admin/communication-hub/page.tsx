@@ -1783,7 +1783,7 @@ export default function AdminCommunicationHub() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Link href="/individual-conversations">
+                <Link href="/admin/individual-conversations">
                   <Button variant="outline">
                     <MessageSquare className="w-4 h-4 mr-2" />
                     Individual Conversations
