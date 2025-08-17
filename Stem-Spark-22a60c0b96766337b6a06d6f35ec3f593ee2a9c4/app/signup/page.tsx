@@ -106,15 +106,6 @@ export default function SignUpPage() {
       }
     }
 
-    if (formData.role === "teacher") {
-      if (!formData.schoolName) {
-        return "Teachers must provide their school name";
-      }
-      if (!formData.phone) {
-        return "Teachers must provide their phone number";
-      }
-    }
-
     return null;
   };
 
@@ -176,9 +167,6 @@ export default function SignUpPage() {
         if (formData.role === "student") {
           profileData.grade = parseInt(formData.grade);
           profileData.school = formData.schoolName;
-        } else if (formData.role === "teacher") {
-          profileData.school = formData.schoolName;
-          profileData.phone = formData.phone;
         } else if (formData.role === "parent") {
           profileData.phone = formData.phone;
           profileData.school = formData.schoolName;
@@ -361,7 +349,6 @@ export default function SignUpPage() {
                     <option value="" className="text-blue-900 bg-white">Select your role</option>
                     <option value="student" className="text-blue-900 bg-white">Student</option>
                     <option value="parent" className="text-blue-900 bg-white">Parent</option>
-                    <option value="teacher" className="text-blue-900 bg-white">Teacher</option>
                   </select>
                 </div>
 
@@ -602,52 +589,6 @@ export default function SignUpPage() {
                             <option value="parent" className="text-blue-900 bg-white">Parent</option>
                             <option value="other" className="text-blue-900 bg-white">Other</option>
                           </select>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {selectedRole === "teacher" && (
-                  <>
-                    {/* Teacher Information */}
-                    <div className="border-t border-white/20 pt-6 space-y-6">
-                      <h3 className="text-2xl font-bold text-blue-100 flex items-center">
-                        <School className="w-6 h-6 mr-2" />
-                        Teacher Information
-                      </h3>
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                          <Label htmlFor="schoolName" className="text-white font-semibold">
-                            School Name *
-                          </Label>
-                          <Input
-                            id="schoolName"
-                            name="schoolName"
-                            type="text"
-                            placeholder="Your school's name"
-                            value={formData.schoolName}
-                            onChange={handleInputChange}
-                            className="bg-white/10 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl py-3"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-3">
-                          <Label htmlFor="phone" className="text-white font-semibold flex items-center">
-                            <Phone className="w-4 h-4 mr-2" />
-                            Phone Number *
-                          </Label>
-                          <Input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            placeholder="(555) 123-4567"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            className="bg-white/10 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl py-3"
-                            required
-                          />
                         </div>
                       </div>
                     </div>

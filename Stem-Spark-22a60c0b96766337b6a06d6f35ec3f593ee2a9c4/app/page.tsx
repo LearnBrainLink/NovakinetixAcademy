@@ -184,7 +184,7 @@ export default function HomePage() {
                     >
                       Try as Guest
                     </button>
-                    <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
+                    <Link href={isLoggedIn ? "/signup" : "/signup"}>
                       <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm whitespace-nowrap">
                         Get Started
                       </button>
@@ -324,7 +324,7 @@ export default function HomePage() {
                     >
                       Try as Guest
                     </button>
-                    <Link href={isLoggedIn ? "/dashboard" : "/signup"} className="block">
+                    <Link href={isLoggedIn ? "/signup" : "/signup"} className="block">
                       <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg text-sm">
                         Get Started
                       </button>
