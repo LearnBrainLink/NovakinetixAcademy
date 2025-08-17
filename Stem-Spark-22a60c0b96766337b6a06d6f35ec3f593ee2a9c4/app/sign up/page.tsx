@@ -24,7 +24,7 @@ interface FormDataType {
   parentPhone: string;
   relationship: string;
   role: string;
-  phone: string; // Added for parent/teacher accounts
+  phone: string;
 }
 
 export default function SignUpPage() {
@@ -98,7 +98,6 @@ export default function SignUpPage() {
       if (!formData.phone) {
         return "Parents must provide their phone number";
       }
-      // Parents should provide information about their child(ren)
       if (!formData.parentName) {
         return "Parents must provide their child's name";
       }
@@ -148,7 +147,7 @@ export default function SignUpPage() {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: formData.fullName,
-            role: formData.role, // Store role in user metadata
+            role: formData.role,
           },
         },
       });
@@ -163,41 +162,41 @@ export default function SignUpPage() {
       if (data.user) {
         console.log("✅ Auth user created:", data.user.id);
 
-        // The database trigger will automatically create the profile
-        // We just need to update it with additional information if needed
-
-        // Prepare profile update data based on role
-        const profileUpdateData: any = {
+        // Create profile with all necessary information
+        const profileData: any = {
+          id: data.user.id,
+          email: formData.email,
           full_name: formData.fullName,
+          role: formData.role,
           country: formData.country,
           state: formData.state,
         };
 
         // Add role-specific fields
         if (formData.role === "student") {
-          profileUpdateData.grade = parseInt(formData.grade);
-          profileUpdateData.school = formData.schoolName;
+          profileData.grade = parseInt(formData.grade);
+          profileData.school = formData.schoolName;
         } else if (formData.role === "teacher") {
-          profileUpdateData.school = formData.schoolName;
-          profileUpdateData.phone = formData.phone;
+          profileData.school = formData.schoolName;
+          profileData.phone = formData.phone;
         } else if (formData.role === "parent") {
-          profileUpdateData.phone = formData.phone;
-          profileUpdateData.school = formData.schoolName; // Children's school
+          profileData.phone = formData.phone;
+          profileData.school = formData.schoolName;
         }
 
-        // Update profile with additional information
+        // Insert profile
         const { error: profileError } = await supabase
           .from("profiles")
-          .update(profileUpdateData)
-          .eq("id", data.user.id);
+          .insert([profileData]);
 
         if (profileError) {
-          console.error("Profile update error:", profileError);
-          console.error("Profile data attempted:", profileUpdateData);
-          setMessage({ type: "error", text: `Failed to update profile: ${profileError.message}` });
+          console.error("Profile creation error:", profileError);
+          setMessage({ type: "error", text: `Failed to create profile: ${profileError.message}` });
           setIsLoading(false);
           return;
         }
+
+        console.log("✅ Profile created successfully");
 
         // If student, create parent relationship record
         if (formData.role === "student" && formData.parentEmail) {
@@ -206,12 +205,14 @@ export default function SignUpPage() {
             parent_name: formData.parentName,
             parent_email: formData.parentEmail,
             parent_phone: formData.parentPhone,
-            relationship: formData.relationship,
+            relationship_type: formData.relationship || 'parent',
           });
 
           if (parentError) {
             console.error("Parent relationship creation error:", parentError);
             // Don't fail the signup for this, just log it
+          } else {
+            console.log("✅ Parent relationship created");
           }
         }
 
@@ -228,20 +229,8 @@ export default function SignUpPage() {
           if (childError) {
             console.error("Child information creation error:", childError);
             // Don't fail the signup for this, just log it
-          }
-
-          // Create parent relationship record
-          const { error: parentError } = await supabase.from("parent_student_relationships").insert({
-            student_id: null, // Will be updated when child creates account
-            parent_name: formData.fullName, // Parent's own name
-            parent_email: formData.email, // Parent's email
-            parent_phone: formData.phone, // Parent's phone
-            relationship: 'parent',
-          });
-
-          if (parentError) {
-            console.error("Parent relationship creation error:", parentError);
-            // Don't fail the signup for this, just log it
+          } else {
+            console.log("✅ Child information created");
           }
         }
 
@@ -251,6 +240,11 @@ export default function SignUpPage() {
           type: "success",
           text: "Account created successfully! Please check your email to verify your account.",
         });
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 3000);
       } else {
         setMessage({ type: "error", text: "Failed to create account. Please try again." });
       }
@@ -605,6 +599,7 @@ export default function SignUpPage() {
                             <option value="mother" className="text-blue-900 bg-white">Mother</option>
                             <option value="father" className="text-blue-900 bg-white">Father</option>
                             <option value="guardian" className="text-blue-900 bg-white">Guardian</option>
+                            <option value="parent" className="text-blue-900 bg-white">Parent</option>
                             <option value="other" className="text-blue-900 bg-white">Other</option>
                           </select>
                         </div>
