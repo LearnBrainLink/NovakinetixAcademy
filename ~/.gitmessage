@@ -1,0 +1,21 @@
+# Commit Message Template
+# 
+# Type: feat|fix|docs|style|refactor|test|chore
+# Scope: (optional) what part of the codebase is affected
+# 
+# Subject: Brief description of the change (max 50 characters)
+# 
+# Body: More detailed explanation if needed (wrap at 72 characters)
+# 
+# Footer: References to issues, breaking changes, etc.
+# 
+# Examples:
+# feat: add user authentication system
+# fix: resolve database connection timeout
+# docs: update API documentation
+# 
+# Remember: 
+# - Use present tense ("add" not "added")
+# - Use imperative mood ("move" not "moves")
+# - Don't capitalize the first letter
+# - No period at the end
