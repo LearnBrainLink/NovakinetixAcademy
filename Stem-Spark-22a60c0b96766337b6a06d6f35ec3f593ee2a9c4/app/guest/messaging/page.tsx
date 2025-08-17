@@ -275,7 +275,7 @@ export default function GuestMessaging() {
                   students, tutors, and mentors.
                 </p>
                 <div className="mt-3">
-                  <Link href="/sign%20up">
+                  <Link href="/signup">
                     <Button className="bg-blue-600 hover:bg-blue-700">
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Sign Up for Real Messaging

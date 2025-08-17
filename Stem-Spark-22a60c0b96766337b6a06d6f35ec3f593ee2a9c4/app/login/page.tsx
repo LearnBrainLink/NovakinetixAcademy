@@ -468,7 +468,7 @@ export default function SecureLoginPage() {
                   {isLogin ? (
                     <button
                       type="button"
-                      onClick={() => router.push("/sign%20up")}
+                      onClick={() => router.push("/signup")}
                       className="ml-2 text-blue-300 hover:text-white font-medium underline transition-colors"
                     >
                       Sign up

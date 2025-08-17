@@ -55,7 +55,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onWatchDemo }) => {
           hands-on learning experiences, and real-world applications.
         </p>
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <Link href="/sign%20up">
+          <Link href="/signup">
             <button className="group relative bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold px-12 py-6 rounded-full text-xl shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 hover:scale-105 transform">
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-full blur opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative flex items-center">

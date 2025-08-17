@@ -276,7 +276,7 @@ export default function GuestDashboard() {
                   Sign up for a real account to save your progress and access all features permanently.
                 </p>
                 <div className="mt-3">
-                  <Link href="/sign%20up">
+                  <Link href="/signup">
                     <Button className="bg-blue-600 hover:bg-blue-700">
                       <Star className="w-4 h-4 mr-2" />
                       Sign Up to Save Progress
