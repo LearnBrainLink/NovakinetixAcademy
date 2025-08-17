@@ -1,183 +1,173 @@
-# Supabase CLI
+# NovaKinetix Academy - STEM Learning Platform
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/learnbrainlinks-projects/v0-empowering-young-engineers-dt)
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-black?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+## 🎓 About NovaKinetix Academy
 
-This repository contains all the functionality for Supabase CLI.
+NovaKinetix Academy is a comprehensive STEM learning platform designed to empower young engineers and students. Our platform provides interactive learning experiences, mentorship opportunities, and hands-on projects in science, technology, engineering, and mathematics.
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+## ✨ Features
 
-## Getting started
+### 🎯 Core Learning Features
+- **AI Tutor**: Personalized learning assistance with AI-powered tutoring
+- **Virtual Lab**: Interactive virtual laboratory experiences
+- **Learning Paths**: Structured curriculum and learning tracks
+- **Project Showcase**: Student project display and collaboration
+- **Video Tutorials**: Comprehensive video learning resources
 
-### Install the CLI
+### 👥 Community & Collaboration
+- **Communication Hub**: Real-time messaging and collaboration
+- **Mentorship Program**: Connect with industry professionals
+- **Discussion Boards**: Community-driven learning discussions
+- **Competitions**: STEM challenges and competitions
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+### 🏢 Professional Development
+- **Internship Applications**: Apply for real-world opportunities
+- **Career Pathways**: Guidance for STEM career development
+- **Volunteer Hours Tracking**: Community service and leadership tracking
+- **Professional Networking**: Connect with peers and mentors
+
+### 🔧 Administrative Tools
+- **Admin Dashboard**: Comprehensive management interface
+- **User Management**: Advanced user administration
+- **Analytics**: Detailed platform usage analytics
+- **Content Management**: Educational content administration
+
+## 🚀 Technology Stack
+
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **Deployment**: Vercel
+- **Email Service**: Flask Mail Service
+- **AI Integration**: OpenAI API
+- **Database**: PostgreSQL with Row Level Security
+
+## 📦 Installation & Setup
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Vercel account (for deployment)
+
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/LearnBrainLink/Stem-Spark.git
+   cd Stem-Spark
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your environment variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   OPENAI_API_KEY=your_openai_api_key
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🗄️ Database Setup
+
+The project uses Supabase with the following key features:
+
+- **Row Level Security (RLS)**: Secure data access
+- **Real-time subscriptions**: Live updates
+- **Authentication**: Built-in user management
+- **Storage**: File uploads and management
+
+Run the database migrations:
+```bash
+# Apply migrations
+supabase db push
+```
+
+## 🔐 Security Features
+
+- **Admin Protection**: Secure admin-only routes
+- **Role-based Access Control**: User permission management
+- **Input Validation**: Comprehensive form validation
+- **SQL Injection Protection**: Parameterized queries
+- **XSS Prevention**: Content sanitization
+
+## 📊 Analytics & Monitoring
+
+- **User Analytics**: Track user engagement and learning progress
+- **Performance Monitoring**: Real-time performance metrics
+- **Error Tracking**: Comprehensive error logging and monitoring
+- **Admin Dashboard**: Detailed platform insights
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run tests: `npm test`
+5. Commit your changes: `git commit -m 'feat: add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## 📚 Documentation
+
+- [Admin Setup Guide](docs/admin-setup.md)
+- [API Documentation](docs/api.md)
+- [Database Schema](docs/database.md)
+- [Deployment Guide](docs/deployment.md)
+- [Security Guide](docs/security.md)
+
+## 🌐 Deployment
+
+The application is automatically deployed to Vercel from the main branch. For manual deployment:
 
 ```bash
-npm i supabase --save-dev
+# Build the application
+npm run build
+
+# Deploy to Vercel
+vercel --prod
 ```
 
-To install the beta release channel:
+## 📞 Support
 
-```bash
-npm i supabase@beta --save-dev
-```
+- **Email**: support@novakinetix.com
+- **Documentation**: [docs.novakinetix.com](https://docs.novakinetix.com)
+- **Issues**: [GitHub Issues](https://github.com/LearnBrainLink/Stem-Spark/issues)
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+## 📄 License
 
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+## 🙏 Acknowledgments
 
-<details>
-  <summary><b>macOS</b></summary>
+- **Supabase** for the amazing backend platform
+- **Vercel** for seamless deployment
+- **Next.js** for the powerful React framework
+- **OpenAI** for AI-powered learning features
+- **Tailwind CSS** for beautiful, responsive design
 
-  Available via [Homebrew](https://brew.sh). To install:
+---
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
-
-```bash
-supabase bootstrap
-```
-
-Or using npx:
-
-```bash
-npx supabase bootstrap
-```
-
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
-
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
-```
+**Built with ❤️ for the next generation of STEM leaders**
