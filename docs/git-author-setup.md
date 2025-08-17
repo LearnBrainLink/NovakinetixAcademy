@@ -2,8 +2,8 @@
 
 ## ✅ Current Status
 Your git configuration is properly set up:
-- **Email**: yatishgrandhe@gmail.com
-- **Name**: Yatish Grandhe
+- **Email**: learnbrainlink@gmail.com
+- **Name**: LearnBrainLink
 
 ## 🛡️ Protection Measures in Place
 
@@ -26,8 +26,8 @@ When cloning or initializing a new repository:
 
 ```bash
 # Set up your author information
-git config --global user.name "Yatish Grandhe"
-git config --global user.email "yatishgrandhe@gmail.com"
+git config --global user.name "LearnBrainLink"
+git config --global user.email "learnbrainlink@gmail.com"
 
 # Verify the configuration
 ./scripts/check-git-config.sh
@@ -41,8 +41,8 @@ If you encounter author issues in an existing repository:
 ./scripts/check-git-config.sh
 
 # If needed, set local configuration
-git config --local user.name "Yatish Grandhe"
-git config --local user.email "yatishgrandhe@gmail.com"
+git config --local user.name "LearnBrainLink"
+git config --local user.email "learnbrainlink@gmail.com"
 ```
 
 ### Before Making Commits
@@ -62,8 +62,8 @@ git config user.email
 ### Issue: "A commit author is required"
 **Solution**: Your git user.name or user.email is not configured
 ```bash
-git config --global user.name "Yatish Grandhe"
-git config --global user.email "yatishgrandhe@gmail.com"
+git config --global user.name "LearnBrainLink"
+git config --global user.email "learnbrainlink@gmail.com"
 ```
 
 ### Issue: Placeholder author information
@@ -73,16 +73,16 @@ git config --global user.email "yatishgrandhe@gmail.com"
 git config --list | grep user
 
 # Fix if needed
-git config --global user.name "Yatish Grandhe"
-git config --global user.email "yatishgrandhe@gmail.com"
+git config --global user.name "LearnBrainLink"
+git config --global user.email "learnbrainlink@gmail.com"
 ```
 
 ### Issue: Different author for specific repository
 **Solution**: Set local configuration for that repository
 ```bash
 cd /path/to/repository
-git config --local user.name "Yatish Grandhe"
-git config --local user.email "yatishgrandhe@gmail.com"
+git config --local user.name "LearnBrainLink"
+git config --local user.email "learnbrainlink@gmail.com"
 ```
 
 ## 📋 Best Practices
@@ -125,3 +125,10 @@ If you continue to have issues:
 1. Run `./scripts/check-git-config.sh` and share the output
 2. Check if the pre-commit hook is working: `.git/hooks/pre-commit`
 3. Verify your git configuration: `git config --list | grep user`
+
+## 🔄 Account Configuration Update
+
+**Updated**: All commits now use the LearnBrainLink organization account:
+- **Organization**: LearnBrainLink
+- **Email**: learnbrainlink@gmail.com
+- **Purpose**: Official NovaKinetix Academy project commits
